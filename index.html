@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>麻雀点数計算</title>
+</head>
+<body>
+
+<h2>麻雀 点数計算</h2>
+
+翻数:
+<input type="number" id="han" min="1" max="13" value="1"><br><br>
+
+和了形:
+<select id="form">
+  <option value="naki">鳴き</option>
+  <option value="menzen">メンゼン</option>
+  <option value="pinfu">平和</option>
+  <option value="chitoi">七対子</option>
+</select><br><br>
+
+和了方法:
+<select id="win">
+  <option value="ron">ロン</option>
+  <option value="tsumo">ツモ</option>
+</select><br><br>
+
+親:
+<select id="oya">
+  <option value="0">子</option>
+  <option value="1">親</option>
+</select><br><br>
+
+<button onclick="calc()">計算</button>
+
+<h3 id="result"></h3>
+
+<script>
+function calc() {
+
+  let han = parseInt(document.getElementById("han").value);
+  let form = document.getElementById("form").value;
+  let win = document.getElementById("win").value;
+  let oya = document.getElementById("oya").value;
+
+  let fu;
+
+  // 符決定
+  if (form === "chitoi") {
+    fu = 25;
+  } 
+  else if (form === "pinfu" && win === "tsumo") {
+    fu = 20;
+  } 
+  else if (form === "menzen" && win === "ron") {
+    fu = 40;
+  } 
+  else if (form === "naki") {
+    fu = 30;
+  } 
+  else {
+    fu = 30;
+  }
+
+  let base;
+
+  // 満貫以上
+  if (han >= 13) base = 8000;
+  else if (han >= 11) base = 6000;
+  else if (han >= 8) base = 4000;
+  else if (han >= 6) base = 3000;
+  else if (han >= 5) base = 2000;
+  else {
+    base = fu * Math.pow(2, han + 2);
+    base = Math.ceil(base / 100) * 100;
+  }
+
+  let resultText = "";
+
+  if (win === "ron") {
+
+    let total = (oya == "1") ? base * 6 : base * 4;
+    total = Math.ceil(total / 100) * 100;
+
+    resultText = total + " 点（ロン）";
+
+  } else {
+
+    if (oya == "1") {
+      let pay = Math.ceil((base * 2) / 100) * 100;
+      resultText = pay + " オール（親ツモ）";
+    } else {
+      let koPay = Math.ceil((base * 1) / 100) * 100;
+      let oyaPay = Math.ceil((base * 2) / 100) * 100;
+      resultText = "子: " + koPay + " 点 / 親: " + oyaPay + " 点";
+    }
+
+  }
+
+  document.getElementById("result").innerText =
+    "符: " + fu + "符\n" + resultText;
+
+}
+</script>
+
+</body>
+</html>
