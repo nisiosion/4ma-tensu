@@ -8,98 +8,85 @@
 
 <h2>麻雀 点数計算</h2>
 
-翻数:
-<input type="number" id="han" min="1" max="13" value="1"><br><br>
-
 和了形:
 <select id="form">
   <option value="naki">鳴き</option>
   <option value="menzen">メンゼン</option>
   <option value="pinfu">平和</option>
   <option value="chitoi">七対子</option>
-</select><br><br>
+</select>
+<br><br>
 
-和了方法:
-<select id="win">
-  <option value="ron">ロン</option>
-  <option value="tsumo">ツモ</option>
-</select><br><br>
+翻数:
+<input type="number" id="han" min="1" max="13" value="1">
+<br><br>
 
-親:
+子 / 親:
 <select id="oya">
-  <option value="0">子</option>
-  <option value="1">親</option>
-</select><br><br>
+  <option value="ko">子</option>
+  <option value="oya">親</option>
+</select>
+<br><br>
 
 <button onclick="calc()">計算</button>
 
 <h3 id="result"></h3>
 
 <script>
+function getFu(form, winType) {
+  if (form === "naki") return 30;
+  if (form === "menzen") return winType === "ron" ? 40 : 30;
+  if (form === "pinfu") return winType === "ron" ? 30 : 20;
+  if (form === "chitoi") return 25;
+}
+
+function getBasePoint(fu, han) {
+  if (han >= 13) return 8000;
+  if (han >= 11) return 6000;
+  if (han >= 8) return 4000;
+  if (han >= 6) return 3000;
+  if (han >= 5) return 2000;
+  return fu * Math.pow(2, han + 2);
+}
+
+function round100(num) {
+  return Math.ceil(num / 100) * 100;
+}
+
 function calc() {
 
-  let han = parseInt(document.getElementById("han").value);
   let form = document.getElementById("form").value;
-  let win = document.getElementById("win").value;
+  let han = parseInt(document.getElementById("han").value);
   let oya = document.getElementById("oya").value;
 
-  let fu;
+  let fuRon = getFu(form, "ron");
+  let fuTsumo = getFu(form, "tsumo");
 
-  // 符決定
-  if (form === "chitoi") {
-    fu = 25;
-  } 
-  else if (form === "pinfu" && win === "tsumo") {
-    fu = 20;
-  } 
-  else if (form === "menzen" && win === "ron") {
-    fu = 40;
-  } 
-  else if (form === "naki") {
-    fu = 30;
-  } 
-  else {
-    fu = 30;
-  }
+  let baseRon = getBasePoint(fuRon, han);
+  let baseTsumo = getBasePoint(fuTsumo, han);
 
-  let base;
+  let ronScore, tsumoText;
 
-  // 満貫以上
-  if (han >= 13) base = 8000;
-  else if (han >= 11) base = 6000;
-  else if (han >= 8) base = 4000;
-  else if (han >= 6) base = 3000;
-  else if (han >= 5) base = 2000;
-  else {
-    base = fu * Math.pow(2, han + 2);
-    base = Math.ceil(base / 100) * 100;
-  }
+  if (oya === "ko") {
 
-  let resultText = "";
+    ronScore = round100(baseRon * 4);
 
-  if (win === "ron") {
-
-    let total = (oya == "1") ? base * 6 : base * 4;
-    total = Math.ceil(total / 100) * 100;
-
-    resultText = total + " 点（ロン）";
+    let koPay = round100(baseTsumo * 1);
+    let oyaPay = round100(baseTsumo * 2);
+    tsumoText = "子: " + koPay + "点 / 親: " + oyaPay + "点";
 
   } else {
 
-    if (oya == "1") {
-      let pay = Math.ceil((base * 2) / 100) * 100;
-      resultText = pay + " オール（親ツモ）";
-    } else {
-      let koPay = Math.ceil((base * 1) / 100) * 100;
-      let oyaPay = Math.ceil((base * 2) / 100) * 100;
-      resultText = "子: " + koPay + " 点 / 親: " + oyaPay + " 点";
-    }
+    ronScore = round100(baseRon * 6);
+
+    let pay = round100(baseTsumo * 2);
+    tsumoText = pay + "点オール";
 
   }
 
-  document.getElementById("result").innerText =
-    "符: " + fu + "符\n" + resultText;
-
+  document.getElementById("result").innerHTML =
+    "【ロン】 " + fuRon + "符 → " + ronScore + "点<br>" +
+    "【ツモ】 " + fuTsumo + "符 → " + tsumoText;
 }
 </script>
 
